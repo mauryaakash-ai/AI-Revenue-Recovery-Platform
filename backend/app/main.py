@@ -54,6 +54,7 @@ async def api_health():
 
 # Import routes after app creation to avoid circular imports
 from app.routes import merchants, transactions, analytics, agent
+from app import analytics as analytics_module
 
 app.include_router(merchants.router, prefix="/api/v1", tags=["merchants"])
 app.include_router(transactions.router, prefix="/api/v1", tags=["transactions"])

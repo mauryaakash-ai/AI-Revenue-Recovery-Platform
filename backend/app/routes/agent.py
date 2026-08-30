@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Merchant, AgentAction
+from app.models import Merchant
+from app.agent import RevPilotAgent
 import json
 
 router = APIRouter()
@@ -14,17 +15,19 @@ async def agent_query(
     query: str,
     db: Session = Depends(get_db)
 ):
-    """Submit a query to the RevPilot agent"""
+    """Submit a query to the RevPilot agent with SSE streaming"""
     merchant = db.query(Merchant).filter(Merchant.id == merchant_id).first()
     if not merchant:
         raise HTTPException(status_code=404, detail="Merchant not found")
     
-    # Placeholder: Agent orchestration will be added in Phase 4
-    return {
-        "query": query,
-        "status": "processing",
-        "message": "Agent orchestration coming in Phase 4"
-    }
+    # Create agent and stream investigation
+    agent = RevPilotAgent(db, merchant_id, provider_name="mock")
+    
+    async def stream_investigation():
+        async for step in agent.investigate(query):
+            yield f"data: {step}\n\n"
+    
+    return StreamingResponse(stream_investigation(), media_type="text/event-stream")
 
 
 @router.post("/merchants/{merchant_id}/agent/approve-action")
@@ -35,6 +38,8 @@ async def approve_action(
     db: Session = Depends(get_db)
 ):
     """Approve or reject a sensitive agent action"""
+    from app.models import AgentAction, ActionStatus
+    
     action = db.query(AgentAction).filter(
         AgentAction.merchant_id == merchant_id,
         AgentAction.id == action_id
@@ -43,9 +48,19 @@ async def approve_action(
     if not action:
         raise HTTPException(status_code=404, detail="Action not found")
     
-    # Placeholder: Approval flow will be implemented in Phase 4
+    if approved:
+        action.status = ActionStatus.APPROVED
+        action.approval = "user_approved"
+    else:
+        action.status = ActionStatus.REJECTED
+        action.approval = "user_rejected"
+    
+    db.commit()
+    
     return {
         "action_id": action_id,
         "approved": approved,
-        "status": "approval_recorded"
+        "status": action.status.value,
+        "timestamp": action.created_at.isoformat()
     }
+

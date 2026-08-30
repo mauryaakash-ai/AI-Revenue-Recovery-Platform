@@ -174,7 +174,8 @@ class SyntheticDataGenerator:
             for _ in range(day_transactions):
                 customer = self.random_gen.choice(customers)
                 product = self.random_gen.choice(products)
-                payment_method = self.random_gen.choice(["card", "upi", "netbanking", "wallet"], p=[0.45, 0.35, 0.15, 0.05])
+                # Use numpy's choice with probabilities for proper weighted selection
+                payment_method = self.np_gen.choice(["card", "upi", "netbanking", "wallet"], p=[0.45, 0.35, 0.15, 0.05])
                 
                 # Base success rate
                 success_rate = self.baseline_success_rate

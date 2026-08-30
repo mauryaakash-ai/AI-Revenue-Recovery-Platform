@@ -75,7 +75,7 @@ class Customer(Base):
     checkout_events = relationship("CheckoutEvent", back_populates="customer", cascade="all, delete-orphan")
 
     __table_args__ = (
-        Index("idx_merchant_id", "merchant_id"),
+        Index("idx_customer_merchant_id", "merchant_id"),
         Index("idx_customer_merchant", "merchant_id", "id"),
     )
 
@@ -103,12 +103,12 @@ class Transaction(Base):
     recovery_predictions = relationship("RecoveryPrediction", back_populates="transaction", cascade="all, delete-orphan")
 
     __table_args__ = (
-        Index("idx_merchant_id", "merchant_id"),
-        Index("idx_customer_id", "customer_id"),
-        Index("idx_status", "status"),
-        Index("idx_created_at", "created_at"),
-        Index("idx_payment_method", "payment_method"),
-        Index("idx_merchant_status_time", "merchant_id", "status", "created_at"),
+        Index("idx_transaction_merchant_id", "merchant_id"),
+        Index("idx_transaction_customer_id", "customer_id"),
+        Index("idx_transaction_status", "status"),
+        Index("idx_transaction_created_at", "created_at"),
+        Index("idx_transaction_payment_method", "payment_method"),
+        Index("idx_transaction_merchant_status_time", "merchant_id", "status", "created_at"),
     )
 
 
@@ -127,9 +127,9 @@ class Refund(Base):
     transaction = relationship("Transaction", back_populates="refunds")
 
     __table_args__ = (
-        Index("idx_merchant_id", "merchant_id"),
-        Index("idx_transaction_id", "transaction_id"),
-        Index("idx_created_at", "created_at"),
+        Index("idx_refund_merchant_id", "merchant_id"),
+        Index("idx_refund_transaction_id", "transaction_id"),
+        Index("idx_refund_created_at", "created_at"),
     )
 
 
@@ -146,7 +146,7 @@ class Settlement(Base):
     merchant = relationship("Merchant", back_populates="settlements")
 
     __table_args__ = (
-        Index("idx_merchant_id", "merchant_id"),
+        Index("idx_settlement_merchant_id", "merchant_id"),
         Index("idx_settlement_date", "settlement_date"),
     )
 
@@ -163,9 +163,9 @@ class CheckoutEvent(Base):
     customer = relationship("Customer", back_populates="checkout_events")
 
     __table_args__ = (
-        Index("idx_customer_id", "customer_id"),
-        Index("idx_session_id", "session_id"),
-        Index("idx_timestamp", "timestamp"),
+        Index("idx_checkout_customer_id", "customer_id"),
+        Index("idx_checkout_session_id", "session_id"),
+        Index("idx_checkout_timestamp", "timestamp"),
     )
 
 
@@ -182,8 +182,8 @@ class RecoveryPrediction(Base):
     transaction = relationship("Transaction", back_populates="recovery_predictions")
 
     __table_args__ = (
-        Index("idx_transaction_id", "transaction_id"),
-        Index("idx_probability", "probability"),
+        Index("idx_recovery_transaction_id", "transaction_id"),
+        Index("idx_recovery_probability", "probability"),
     )
 
 
@@ -206,10 +206,10 @@ class AgentAction(Base):
     merchant = relationship("Merchant", back_populates="agent_actions")
 
     __table_args__ = (
-        Index("idx_merchant_id", "merchant_id"),
-        Index("idx_status", "status"),
-        Index("idx_created_at", "created_at"),
-        Index("idx_tool", "tool"),
+        Index("idx_agent_merchant_id", "merchant_id"),
+        Index("idx_agent_status", "status"),
+        Index("idx_agent_created_at", "created_at"),
+        Index("idx_agent_tool", "tool"),
     )
 
 
@@ -227,7 +227,7 @@ class AuditLog(Base):
     approval_status = Column(String(50), nullable=True)  # approved, rejected, pending
 
     __table_args__ = (
-        Index("idx_timestamp", "timestamp"),
-        Index("idx_merchant_id", "merchant_id"),
-        Index("idx_action", "action"),
+        Index("idx_audit_timestamp", "timestamp"),
+        Index("idx_audit_merchant_id", "merchant_id"),
+        Index("idx_audit_action", "action"),
     )
