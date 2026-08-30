@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import Link from 'next/link'
 import axios from 'axios'
 
 interface HealthStatus {
@@ -64,38 +65,39 @@ export default function Home() {
             </div>
 
             <div>
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">Phase 1: Foundation</h2>
-              <div className="space-y-2 text-gray-700">
-                <p className="flex items-center">
-                  <span className="text-green-500 mr-2">✓</span>
-                  Next.js frontend initialized
-                </p>
-                <p className="flex items-center">
-                  <span className="text-green-500 mr-2">✓</span>
-                  FastAPI backend structure ready
-                </p>
-                <p className="flex items-center">
-                  <span className="text-green-500 mr-2">✓</span>
-                  PostgreSQL schema defined
-                </p>
-                <p className="flex items-center">
-                  <span className="text-green-500 mr-2">✓</span>
-                  Synthetic data generator created
-                </p>
-                <p className="flex items-center">
-                  <span className="text-green-500 mr-2">✓</span>
-                  Docker Compose stack configured
-                </p>
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">Navigation</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Link href="/dashboard" className="block p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition">
+                  <h3 className="font-semibold text-blue-900">📊 Dashboard</h3>
+                  <p className="text-sm text-blue-700 mt-1">KPIs, revenue leaks, recommended actions</p>
+                </Link>
+                
+                <Link href="/chat" className="block p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition">
+                  <h3 className="font-semibold text-green-900">💬 Chat</h3>
+                  <p className="text-sm text-green-700 mt-1">Ask RevPilot questions in natural language</p>
+                </Link>
+                
+                <Link href="/audit-log" className="block p-4 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition">
+                  <h3 className="font-semibold text-purple-900">📋 Audit Log</h3>
+                  <p className="text-sm text-purple-700 mt-1">Track all agent actions and approvals</p>
+                </Link>
+                
+                <a href="http://localhost:8000/docs" target="_blank" rel="noreferrer" className="block p-4 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition">
+                  <h3 className="font-semibold text-gray-900">🔌 API Docs</h3>
+                  <p className="text-sm text-gray-700 mt-1">FastAPI Swagger documentation</p>
+                </a>
               </div>
             </div>
 
             <div>
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">Next Steps</h2>
-              <ol className="list-decimal list-inside space-y-2 text-gray-700">
-                <li>Start Docker Compose: `docker compose up`</li>
-                <li>Run synthetic data generator: `python data/generator.py`</li>
-                <li>Build Phase 2: Analytics layer</li>
-              </ol>
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">Features</h2>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center"><span className="text-green-500 mr-2">✓</span> Real-time anomaly detection</li>
+                <li className="flex items-center"><span className="text-green-500 mr-2">✓</span> Root cause analysis</li>
+                <li className="flex items-center"><span className="text-green-500 mr-2">✓</span> Revenue recovery ranking</li>
+                <li className="flex items-center"><span className="text-green-500 mr-2">✓</span> Human-in-the-loop approval</li>
+                <li className="flex items-center"><span className="text-green-500 mr-2">✓</span> Full audit trail</li>
+              </ul>
             </div>
           </div>
         </div>
