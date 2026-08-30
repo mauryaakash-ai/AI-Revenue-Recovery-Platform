@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: revpilot_db
+    environment:
+      POSTGRES_USER: revpilot_user
+      POSTGRES_PASSWORD: revpilot_password
+      POSTGRES_DB: revpilot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - revpilot_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U revpilot_user -d revpilot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: revpilot_backend
+    environment:
+      DATABASE_URL: postgresql://revpilot_user:revpilot_password@postgres:5432/revpilot
+      PYTHONUNBUFFERED: 1
+      PYTHONDONTWRITEBYTECODE: 1
+      ENVIRONMENT: development
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - revpilot_network
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: revpilot_frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+    networks:
+      - revpilot_network
+    command: npm run dev
+
+  redis:
+    image: redis:7-alpine
+    container_name: revpilot_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - revpilot_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+
+networks:
+  revpilot_network:
+    driver: bridge
