@@ -20,9 +20,11 @@
     "postcss": "^8.4.32",
     "autoprefixer": "^10.4.16",
     "recharts": "^2.10.3",
+    "lucide-react": "^0.294.0",
     "@heroicons/react": "^2.0.18",
     "axios": "^1.6.2",
-    "clsx": "^2.0.0"
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^2.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.5"

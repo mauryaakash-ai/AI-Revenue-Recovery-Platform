@@ -13,10 +13,11 @@ import joblib
 import os
 
 # Model paths
-MODEL_DIR = "/tmp/revpilot_models"
-ANOMALY_MODEL_PATH = f"{MODEL_DIR}/isolation_forest.pkl"
-RECOVERY_MODEL_PATH = f"{MODEL_DIR}/recovery_lr.pkl"
-SCALER_PATH = f"{MODEL_DIR}/scaler.pkl"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_DIR = os.path.join(BASE_DIR, "models_cache")
+ANOMALY_MODEL_PATH = os.path.join(MODEL_DIR, "isolation_forest.pkl")
+RECOVERY_MODEL_PATH = os.path.join(MODEL_DIR, "recovery_lr.pkl")
+SCALER_PATH = os.path.join(MODEL_DIR, "scaler.pkl")
 
 # Create model directory
 os.makedirs(MODEL_DIR, exist_ok=True)

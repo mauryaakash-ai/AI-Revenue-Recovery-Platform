@@ -65,7 +65,7 @@ class EnhancedRevPilotAgent:
         self.merchant_id = merchant_id
         self.provider = ProviderFactory.get_default_provider() if provider_name == "mock" else ProviderFactory.create(provider_name)
         self.tools = ToolRegistry(db, self.provider)
-        self.analytics = AnalyticsEngine(db)
+        self.analytics = AnalyticsEngine
         
         # Investigation tracking
         self.investigation_id = None

@@ -53,10 +53,27 @@ async def api_health():
 
 
 # Import routes after app creation to avoid circular imports
-from app.routes import merchants, transactions, analytics, agent
-from app import analytics as analytics_module
+from app.routes import (
+    merchants, transactions, analytics, agent, recovery, strategies, 
+    experiments, alerts, customers, copilot, models_health,
+    checkout_dropoff, dunning, b2b_chaser, mandates, voice_recovery, ptp, guardrails
+)
 
 app.include_router(merchants.router, prefix="/api/v1", tags=["merchants"])
-app.include_router(transactions.router, prefix="/api/v1", tags=["transactions"])
 app.include_router(analytics.router, prefix="/api/v1", tags=["analytics"])
+app.include_router(recovery.router, prefix="/api/v1", tags=["recovery"])
+app.include_router(transactions.router, prefix="/api/v1", tags=["transactions"])
+app.include_router(customers.router, prefix="/api/v1", tags=["customers"])
+app.include_router(strategies.router, prefix="/api/v1", tags=["strategies"])
+app.include_router(experiments.router, prefix="/api/v1", tags=["experiments"])
+app.include_router(alerts.router, prefix="/api/v1", tags=["alerts"])
+app.include_router(copilot.router, prefix="/api/v1", tags=["copilot"])
+app.include_router(models_health.router, prefix="/api/v1", tags=["models"])
 app.include_router(agent.router, prefix="/api/v1", tags=["agent"])
+app.include_router(checkout_dropoff.router, prefix="/api/v1", tags=["checkout-dropoff"])
+app.include_router(dunning.router, prefix="/api/v1", tags=["dunning"])
+app.include_router(b2b_chaser.router, prefix="/api/v1", tags=["b2b-chaser"])
+app.include_router(mandates.router, prefix="/api/v1", tags=["mandates"])
+app.include_router(voice_recovery.router, prefix="/api/v1", tags=["voice"])
+app.include_router(ptp.router, prefix="/api/v1", tags=["ptp"])
+app.include_router(guardrails.router, prefix="/api/v1", tags=["guardrails"])

@@ -9,7 +9,7 @@ Enhanced Tool Registry with:
 
 import hashlib
 import json
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple, List, Any
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 

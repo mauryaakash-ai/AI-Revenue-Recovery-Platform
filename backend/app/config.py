@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     database_url: str = os.getenv(
         "DATABASE_URL",
-        "postgresql://revpilot_user:revpilot_password@localhost:5432/revpilot"
+        "sqlite:///./revenue_recovery.db"
     )
     environment: str = os.getenv("ENVIRONMENT", "development")
     api_url: str = os.getenv("API_URL", "http://localhost:8000")

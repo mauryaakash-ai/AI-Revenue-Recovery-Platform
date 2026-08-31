@@ -7,6 +7,62 @@ from app.analytics import AnalyticsEngine
 router = APIRouter()
 
 
+@router.get("/merchants/{merchant_id}/analytics/overview")
+async def get_overview(
+    merchant_id: str,
+    timeframe: str = "7D",
+    db: Session = Depends(get_db)
+):
+    """Get Control Center Overview with KPIs, Funnel, Charts, Top Opps & AI Insights"""
+    merchant = db.query(Merchant).filter(Merchant.id == merchant_id).first()
+    if not merchant:
+        # Fallback to primary merchant if not found
+        merchant = db.query(Merchant).first()
+        if not merchant:
+            raise HTTPException(status_code=404, detail="Merchant not found")
+        merchant_id = merchant.id
+    
+    return AnalyticsEngine.get_control_center_overview(db, merchant_id, timeframe)
+
+
+@router.get("/merchants/{merchant_id}/analytics/payment-methods")
+async def get_payment_methods_intelligence(
+    merchant_id: str,
+    db: Session = Depends(get_db)
+):
+    """Get payment method recovery vs failure intelligence"""
+    merchant = db.query(Merchant).filter(Merchant.id == merchant_id).first() or db.query(Merchant).first()
+    if not merchant:
+        raise HTTPException(status_code=404, detail="Merchant not found")
+    return AnalyticsEngine.get_payment_method_intelligence(db, merchant.id)
+
+
+@router.get("/merchants/{merchant_id}/analytics/failures-breakdown")
+async def get_failures_breakdown(
+    merchant_id: str,
+    days: int = 7,
+    db: Session = Depends(get_db)
+):
+    """Get failure breakdown by reason and bank with spike detection"""
+    merchant = db.query(Merchant).filter(Merchant.id == merchant_id).first() or db.query(Merchant).first()
+    if not merchant:
+        raise HTTPException(status_code=404, detail="Merchant not found")
+    return AnalyticsEngine.get_failure_analytics(db, merchant.id, days)
+
+
+@router.get("/merchants/{merchant_id}/analytics/forecast")
+async def get_forecast(
+    merchant_id: str,
+    days: int = 7,
+    db: Session = Depends(get_db)
+):
+    """Get 7-day revenue recovery forecast with confidence intervals"""
+    merchant = db.query(Merchant).filter(Merchant.id == merchant_id).first() or db.query(Merchant).first()
+    if not merchant:
+        raise HTTPException(status_code=404, detail="Merchant not found")
+    return AnalyticsEngine.get_revenue_forecast(db, merchant.id, days)
+
+
 @router.get("/merchants/{merchant_id}/analytics/revenue")
 async def get_revenue(
     merchant_id: str,
