@@ -7,7 +7,7 @@ The **Razorpay AI Revenue Recovery Platform** is a fintech application designed 
 
 ---
 
-## ⚡ Quick Start (No Docker Required)
+## Quick Start (No Docker Required)
 
 This platform runs directly on your local machine with standard Python and Node.js runtimes.
 
@@ -35,7 +35,7 @@ chmod +x start-all.sh
 
 ---
 
-## 🌐 Application Endpoints
+##  Application Endpoints
 
 | Service | URL | Description |
 |---|---|---|
@@ -46,7 +46,7 @@ chmod +x start-all.sh
 
 ---
 
-## 📊 Core Platform Metrics & Benchmark Numbers
+## Core Platform Metrics & Benchmark Numbers
 
 - **Revenue at Risk**: `₹1.82 Cr` (↓ 4.8% vs previous period)
 - **Recoverable Revenue**: `₹1.14 Cr` (AI estimated · 62.6% addressable)
@@ -57,7 +57,7 @@ chmod +x start-all.sh
 
 ---
 
-## 🧭 Navigable Application Architecture
+## Navigable Application Architecture
 
 1. **Overview Dashboard** (`/` or `/dashboard`)
    - 6 Core Financial KPI Cards with trend indicators and comparison deltas.
@@ -104,7 +104,7 @@ chmod +x start-all.sh
 
 ---
 
-## 🧪 Automated Testing
+## Automated Testing
 
 Run the comprehensive pytest test suite directly:
 ```bash
