@@ -26,6 +26,7 @@ from app.models import (
     Experiment, Alert, AIInsight, AuditLog,
     CheckoutDropoff, SubscriptionDunning, B2BInvoice, B2BReminder,
     MandateRetry, VoiceCallLog, PromiseToPay, ComplianceRuleLog,
+    SMSLog, User,
     TransactionStatus, RefundStatus, SettlementStatus, ActionStatus, ActionTier
 )
 
@@ -165,6 +166,18 @@ class SyntheticDataGenerator:
             db.add_all(compliance_logs)
             db.commit()
             print(f"[OK] Created {len(compliance_logs)} compliance & stopping rule audit logs")
+
+            # 17. Free Demo SMS Dispatch Logs
+            sms_logs = self._generate_sms_logs(primary_merchant, customers)
+            db.add_all(sms_logs)
+            db.commit()
+            print(f"[OK] Created {len(sms_logs)} demo SMS dispatch logs")
+
+            # 18. Platform Users & Demo Accounts
+            users = self._generate_users(primary_merchant)
+            db.add_all(users)
+            db.commit()
+            print(f"[OK] Created {len(users)} platform users & demo accounts")
 
             print("\n========================================================")
             print("  AI Revenue Recovery Platform Seeding Complete!")
@@ -1112,6 +1125,88 @@ class SyntheticDataGenerator:
                 timestamp=datetime.utcnow() - timedelta(hours=self.random_gen.randint(1, 72), minutes=self.random_gen.randint(0, 59))
             ))
         return logs
+
+    def _generate_sms_logs(self, merchant: Merchant, customers: List[Customer]) -> List[SMSLog]:
+        logs = []
+        templates = [
+            ("cart_recovery", "Namaste {name}! Your cart worth Rs.{amt} is saved. Use code SAVE10 for 10% off: https://rzp.io/l/cart01 - Razorpay"),
+            ("payment_retry", "URGENT: Transaction Rs.{amt} failed. Tap https://rzp.io/l/pay01 to retry securely in 1-click via UPI. - Razorpay"),
+            ("login_otp", "482910 is your Razorpay RevPilot security OTP. Valid for 5 minutes. Do not share with anyone."),
+            ("ptp_reminder", "Hi {name}, reminder for your payment commitment of Rs.{amt} due today. Settle at https://rzp.io/l/ptp01"),
+            ("mandate_pre_debit", "Pre-debit notice: Rs.{amt} will be auto-debited tomorrow for your subscription. Manage at https://rzp.io/l/mandate")
+        ]
+        providers = ["Textbelt Free Tier", "Live Push Gateway (ntfy.sh/razorpay_revpilot_sms)", "RZRPAY Free Sandbox"]
+
+        for i in range(45):
+            cust = self.random_gen.choice(customers)
+            tmpl_name, tmpl_txt = self.random_gen.choice(templates)
+            amt = self.random_gen.randint(1200, 48000)
+            msg = tmpl_txt.replace("{name}", cust.name).replace("{amt}", f"{amt:,.2f}")
+            status = "delivered" if self.random_gen.random() > 0.05 else "failed"
+
+            logs.append(SMSLog(
+                id=f"sms_{uuid.uuid4().hex[:12]}",
+                merchant_id=merchant.id,
+                recipient_phone=cust.phone or "+91 98201 94821",
+                message_body=msg,
+                template_name=tmpl_name,
+                provider=self.random_gen.choice(providers),
+                status=status,
+                dlt_template_id="1407161829038102938",
+                carrier_msg_id=f"CMID_{uuid.uuid4().hex[:8].upper()}",
+                delivery_latency_ms=self.random_gen.randint(850, 1850),
+                cost_inr=0.0,
+                created_at=datetime.utcnow() - timedelta(hours=self.random_gen.randint(1, 48), minutes=self.random_gen.randint(0, 59))
+            ))
+        return logs
+
+    def _generate_users(self, merchant: Merchant) -> List[User]:
+        return [
+            User(
+                id="usr_akash_01",
+                merchant_id=merchant.id,
+                name="Akash Sharma",
+                email="akash@urbankart.com",
+                phone="+91 98201 94821",
+                role="Admin",
+                hashed_password="scrypt:demo_hashed_password_akash",
+                is_active=True,
+                created_at=datetime.utcnow()
+            ),
+            User(
+                id="usr_neha_02",
+                merchant_id=merchant.id,
+                name="Neha Verma",
+                email="neha@revpilot.ai",
+                phone="+91 98765 43210",
+                role="Revenue Operations",
+                hashed_password="scrypt:demo_hashed_password_neha",
+                is_active=True,
+                created_at=datetime.utcnow()
+            ),
+            User(
+                id="usr_vikram_03",
+                merchant_id=merchant.id,
+                name="Vikram Patel",
+                email="vikram@cfo-desk.in",
+                phone="+91 99887 76655",
+                role="Finance",
+                hashed_password="scrypt:demo_hashed_password_vikram",
+                is_active=True,
+                created_at=datetime.utcnow()
+            ),
+            User(
+                id="usr_priya_04",
+                merchant_id=merchant.id,
+                name="Priya Nair",
+                email="priya@fintech-guard.com",
+                phone="+91 91234 56789",
+                role="Operations",
+                hashed_password="scrypt:demo_hashed_password_priya",
+                is_active=True,
+                created_at=datetime.utcnow()
+            )
+        ]
 
 
 if __name__ == "__main__":

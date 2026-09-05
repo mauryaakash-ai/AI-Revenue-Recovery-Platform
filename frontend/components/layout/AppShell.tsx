@@ -33,9 +33,16 @@ import {
   Send,
   CheckCircle2,
   ExternalLink,
-  Volume2
+  Volume2,
+  MessageSquare,
+  LogOut,
+  LogIn,
+  Webhook,
+  Activity,
+  Cpu
 } from 'lucide-react'
 import { CopilotDrawer } from '../ui/CopilotDrawer'
+import { useAuth } from '../../context/AuthContext'
 
 interface AppShellProps {
   children: React.ReactNode
@@ -49,7 +56,14 @@ export const AppShell: React.FC<AppShellProps> = ({
   onMerchantChange
 }) => {
   const router = useRouter()
-  const [currentRole, setCurrentRole] = useState('Revenue Operations')
+  const { user, logout } = useAuth()
+  const [currentRole, setCurrentRole] = useState(user?.role || 'Revenue Operations')
+
+  useEffect(() => {
+    if (user?.role) {
+      setCurrentRole(user.role)
+    }
+  }, [user])
   const [roleMenuOpen, setRoleMenuOpen] = useState(false)
   const [notifMenuOpen, setNotifMenuOpen] = useState(false)
   const [copilotOpen, setCopilotOpen] = useState(false)
@@ -203,6 +217,16 @@ export const AppShell: React.FC<AppShellProps> = ({
 
         {/* Right Actions */}
         <div className="flex items-center gap-2.5">
+          {/* Free Demo SMS Gateway Button */}
+          <Link
+            href="/recovery/sms-gateway"
+            className="hidden sm:flex items-center gap-1.5 text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-lg transition shadow-2xs"
+            title="Open Free Demo SMS Gateway"
+          >
+            <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
+            <span>Demo SMS</span>
+          </Link>
+
           {/* Free Live Push Channel Button */}
           <button
             onClick={() => setLivePushModalOpen(true)}
@@ -268,21 +292,25 @@ export const AppShell: React.FC<AppShellProps> = ({
               className="flex items-center gap-2 pl-2 pr-1.5 py-1 rounded-lg hover:bg-slate-100 transition"
             >
               <div className="w-7 h-7 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-semibold">
-                AK
+                {user?.avatar || 'AK'}
               </div>
               <div className="hidden lg:block text-left">
-                <p className="text-xs font-semibold text-slate-900 leading-tight">Akash</p>
+                <p className="text-xs font-semibold text-slate-900 leading-tight">{user?.name || 'Akash'}</p>
                 <p className="text-[10px] text-slate-500 leading-tight">{currentRole}</p>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </button>
 
             {roleMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-lg p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute right-0 mt-2 w-60 bg-white border border-slate-200 rounded-xl shadow-lg p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
                 <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                  <p className="text-xs font-bold text-slate-900">Akash (Merchant)</p>
-                  <p className="text-[11px] text-slate-500">akash@razorpay-partner.com</p>
+                  <p className="text-xs font-bold text-slate-900">{user?.name || 'Akash Sharma'}</p>
+                  <p className="text-[11px] text-slate-500 truncate">{user?.email || 'akash@urbankart.com'}</p>
+                  <span className="inline-block mt-1 px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 text-[9px] font-bold">
+                    {user?.merchant_name || 'UrbanKart'}
+                  </span>
                 </div>
+
                 <div className="px-3 py-1 text-[10px] uppercase font-semibold text-slate-400">
                   Switch Active Role
                 </div>
@@ -302,6 +330,28 @@ export const AppShell: React.FC<AppShellProps> = ({
                       {currentRole === r && <span className="w-1.5 h-1.5 bg-blue-600 rounded-full" />}
                     </button>
                   ))}
+                </div>
+
+                {/* Account & Logout Actions */}
+                <div className="border-t border-slate-100 mt-2 pt-1 space-y-0.5">
+                  <Link
+                    href="/login"
+                    onClick={() => setRoleMenuOpen(false)}
+                    className="w-full text-left px-3 py-1.5 rounded text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-2"
+                  >
+                    <LogIn className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Switch User / Personas</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setRoleMenuOpen(false)
+                      logout()
+                    }}
+                    className="w-full text-left px-3 py-1.5 rounded text-xs text-red-600 hover:bg-red-50 transition flex items-center gap-2 font-medium"
+                  >
+                    <LogOut className="w-3.5 h-3.5 text-red-600" />
+                    <span>Sign Out</span>
+                  </button>
                 </div>
               </div>
             )}
@@ -402,6 +452,17 @@ export const AppShell: React.FC<AppShellProps> = ({
                   >
                     <PhoneCall className="w-3.5 h-3.5 text-pink-600" />
                     <span>Hinglish Voice Agent</span>
+                    <span className="ml-auto text-[9px] font-bold px-1.5 py-0.2 rounded bg-pink-100 text-pink-800">VOIP</span>
+                  </Link>
+                  <Link
+                    href="/recovery/sms-gateway"
+                    className={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                      isActive('/recovery/sms-gateway') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
+                    <span>SMS Gateway (Demo)</span>
+                    <span className="ml-auto text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800">FREE</span>
                   </Link>
                   <Link
                     href="/recovery/ptp-tracker"
@@ -420,6 +481,15 @@ export const AppShell: React.FC<AppShellProps> = ({
                   >
                     <History className="w-3.5 h-3.5" />
                     <span>Recovery History</span>
+                  </Link>
+                  <Link
+                    href="/webhooks"
+                    className={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                      isActive('/webhooks') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    <Webhook className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Webhook Engine</span>
                   </Link>
                 </div>
               )}
@@ -454,6 +524,15 @@ export const AppShell: React.FC<AppShellProps> = ({
                 <Layers className="w-4 h-4" />
                 <span>Strategy Builder</span>
               </Link>
+              <Link
+                href="/strategies/bandit"
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition ${
+                  isActive('/strategies/bandit') ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                <Cpu className="w-4 h-4 text-indigo-600" />
+                <span>Bandit RL Optimizer</span>
+              </Link>
             </div>
 
             {/* Analytics Group */}
@@ -475,6 +554,15 @@ export const AppShell: React.FC<AppShellProps> = ({
                   >
                     <BarChart3 className="w-3.5 h-3.5" />
                     <span>Revenue Analytics</span>
+                  </Link>
+                  <Link
+                    href="/analytics/bank-health"
+                    className={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                      isActive('/analytics/bank-health') ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    <Activity className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Bank & Gateway Telemetry</span>
                   </Link>
                   <Link
                     href="/analytics/payment-methods"

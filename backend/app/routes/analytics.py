@@ -258,3 +258,20 @@ async def get_top_leaks(
     
     return AnalyticsEngine.get_top_revenue_leaks(db, merchant_id, limit)
 
+
+@router.get("/merchants/{merchant_id}/analytics/forecast/monte-carlo")
+async def get_monte_carlo_forecast(
+    merchant_id: str,
+    days: int = 7,
+    iterations: int = 1000,
+    db: Session = Depends(get_db)
+):
+    """Get Advanced Monte Carlo Revenue Recovery Forecast with 95% Confidence Intervals"""
+    from app.forecasting_engine import monte_carlo_engine
+    return monte_carlo_engine.run_simulation(
+        days=days,
+        num_iterations=iterations,
+        db=db,
+        merchant_id=merchant_id
+    )
+

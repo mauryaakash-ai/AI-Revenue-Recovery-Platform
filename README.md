@@ -102,6 +102,21 @@ chmod +x start-all.sh
 10. **Platform Settings & Role-Based Access Control** (`/settings`)
     - Autonomous execution confidence thresholds, retry cooldown settings, and RBAC matrix across 6 operational roles: Admin, Revenue Operations, Finance, Operations, Analyst, Support.
 
+11. **TRAI DLT SMS Gateway & Recovery Hub** (`/recovery/sms-gateway`)
+    - Zero-cost demo SMS dispatcher with multi-provider fallback (Textbelt Free API, ntfy.sh live mobile stream, Indian DLT sandbox).
+    - Interactive smartphone device mockup displaying real-time incoming SMS with 1-click Razorpay payment links.
+    - Full delivery audit ledger with DLT headers (`RZRPAY`), carrier latencies, and ₹0.00 cost tracking.
+
+12. **Hinglish AI Voice Recovery & WebRTC Softphone** (`/recovery/voice-agent`)
+    - Interactive virtual softphone with Web Audio API DTMF dual-frequency tones (`697-941Hz` / `1209-1477Hz`).
+    - Indian telecom ringback cadence (`400Hz + 450Hz`), live call timer, and bilingual Hinglish speech synthesis.
+    - In-call DTMF menu (Press 1 to send 1-click WhatsApp link, Press 2 to log Promise-to-Pay).
+
+13. **Enterprise Authentication & Login Page** (`/login`)
+    - Corporate Email/Password authentication with 4 instant One-Click Demo Personas (Admin, RevOps, Finance, Risk).
+    - Free Phone SMS OTP authentication powered directly by the Demo SMS API.
+    - Global session management, topbar profile badge, and sign-out controls.
+
 ---
 
 ## Automated Testing

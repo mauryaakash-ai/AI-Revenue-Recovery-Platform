@@ -72,6 +72,11 @@ class Merchant(Base):
     voice_call_logs = relationship("VoiceCallLog", back_populates="merchant", cascade="all, delete-orphan")
     promise_to_pays = relationship("PromiseToPay", back_populates="merchant", cascade="all, delete-orphan")
     compliance_rule_logs = relationship("ComplianceRuleLog", back_populates="merchant", cascade="all, delete-orphan")
+    sms_logs = relationship("SMSLog", back_populates="merchant", cascade="all, delete-orphan")
+    users = relationship("User", back_populates="merchant", cascade="all, delete-orphan")
+    webhook_events = relationship("WebhookEvent", back_populates="merchant", cascade="all, delete-orphan")
+    policies = relationship("MerchantPolicy", back_populates="merchant", cascade="all, delete-orphan")
+    bandit_logs = relationship("BanditArmLog", back_populates="merchant", cascade="all, delete-orphan")
 
 
 class Customer(Base):
@@ -94,6 +99,7 @@ class Customer(Base):
     transactions = relationship("Transaction", back_populates="customer", cascade="all, delete-orphan")
     checkout_events = relationship("CheckoutEvent", back_populates="customer", cascade="all, delete-orphan")
     recovery_opportunities = relationship("RecoveryOpportunity", back_populates="customer", cascade="all, delete-orphan")
+    recovery_profile = relationship("CustomerRecoveryProfile", back_populates="customer", uselist=False, cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("idx_customer_merchant_id", "merchant_id"),
@@ -573,6 +579,8 @@ class VoiceCallLog(Base):
     captured_ptp_date = Column(DateTime, nullable=True)
     captured_ptp_amount = Column(Float, nullable=True)
     audio_simulation_url = Column(String(255), nullable=True)
+    voice_persona = Column(String(50), default="priya", nullable=True)  # priya, rahul, swara, madhur, kavya
+    transaction_id = Column(String(36), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     merchant = relationship("Merchant", back_populates="voice_call_logs")
@@ -632,5 +640,248 @@ class ComplianceRuleLog(Base):
         Index("idx_compliance_merchant_id", "merchant_id"),
         Index("idx_compliance_action", "action_taken"),
         Index("idx_compliance_timestamp", "timestamp"),
+    )
+
+
+class SMSLog(Base):
+    __tablename__ = "sms_logs"
+
+    id = Column(String(36), primary_key=True)
+    merchant_id = Column(String(36), ForeignKey("merchants.id"), nullable=False)
+    recipient_phone = Column(String(30), nullable=False)
+    message_body = Column(Text, nullable=False)
+    template_name = Column(String(100), default="custom", nullable=False)  # cart_recovery, payment_retry, login_otp, ptp_reminder, mandate_pre_debit, custom
+    provider = Column(String(100), default="textbelt_free", nullable=False)  # textbelt_free, ntfy_stream, twilio, rzrpay_sandbox
+    status = Column(String(50), default="delivered", nullable=False)  # queued, sent, delivered, failed, clicked
+    dlt_template_id = Column(String(100), default="1407161829038102938", nullable=False)
+    carrier_msg_id = Column(String(100), nullable=True)
+    delivery_latency_ms = Column(Integer, default=1240, nullable=False)
+    cost_inr = Column(Float, default=0.0, nullable=False)  # Free for demo!
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    merchant = relationship("Merchant", back_populates="sms_logs")
+
+    __table_args__ = (
+        Index("idx_sms_merchant_id", "merchant_id"),
+        Index("idx_sms_status", "status"),
+        Index("idx_sms_created_at", "created_at"),
+        Index("idx_sms_recipient", "recipient_phone"),
+    )
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(String(36), primary_key=True)
+    merchant_id = Column(String(36), ForeignKey("merchants.id"), nullable=False)
+    name = Column(String(255), nullable=False)
+    email = Column(String(255), unique=True, nullable=False)
+    phone = Column(String(30), nullable=True)
+    role = Column(String(50), default="Revenue Operations", nullable=False)  # Admin, Revenue Operations, Finance, Operations, Analyst, Support
+    hashed_password = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    last_login_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    merchant = relationship("Merchant", back_populates="users")
+
+    __table_args__ = (
+        Index("idx_user_merchant_id", "merchant_id"),
+        Index("idx_user_email", "email"),
+    )
+
+
+class WebhookEvent(Base):
+    """Raw and normalized webhook events from payment gateways (Razorpay, Stripe, Generic)"""
+    __tablename__ = "webhook_events"
+
+    id = Column(String(64), primary_key=True)
+    merchant_id = Column(String(36), ForeignKey("merchants.id"), nullable=False)
+    provider = Column(String(50), nullable=False)  # razorpay, stripe, generic
+    event_type = Column(String(100), nullable=False)  # payment.failed, charge.failed, payment_intent.payment_failed
+    event_id = Column(String(100), nullable=True)  # Provider event id
+    idempotency_key = Column(String(128), unique=True, nullable=False)
+    signature = Column(String(255), nullable=True)
+    payload = Column(Text, nullable=False)  # Raw JSON payload
+    status = Column(String(50), default="received", nullable=False)  # received, processed, duplicate, failed
+    error_message = Column(Text, nullable=True)
+    normalized_transaction_id = Column(String(36), nullable=True)
+    received_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    processed_at = Column(DateTime, nullable=True)
+
+    merchant = relationship("Merchant", back_populates="webhook_events")
+
+    __table_args__ = (
+        Index("idx_webhook_merchant", "merchant_id"),
+        Index("idx_webhook_status", "status"),
+        Index("idx_webhook_idempotency", "idempotency_key"),
+        Index("idx_webhook_provider", "provider"),
+    )
+
+
+class MerchantPolicy(Base):
+    """Merchant-specific governance, risk policies, quiet hours, and retry thresholds"""
+    __tablename__ = "merchant_policies"
+
+    id = Column(String(36), primary_key=True)
+    merchant_id = Column(String(36), ForeignKey("merchants.id"), nullable=False)
+    confidence_threshold = Column(Float, default=0.85, nullable=False)  # >= 85% auto-executes
+    max_retry_attempts = Column(Integer, default=3, nullable=False)
+    cooldown_hours = Column(Float, default=4.0, nullable=False)
+    max_communication_cost_inr = Column(Float, default=15.0, nullable=False)
+    max_auto_recovery_amount = Column(Float, default=25000.0, nullable=False)
+    min_expected_roi = Column(Float, default=2.0, nullable=False)  # Minimum 2x Net ROI
+    quiet_hours_start_ist = Column(Integer, default=21, nullable=False)  # 9 PM IST
+    quiet_hours_end_ist = Column(Integer, default=8, nullable=False)     # 8 AM IST
+    allowed_channels = Column(Text, default='["whatsapp", "sms", "upi_intent", "card_retry"]', nullable=False)
+    kill_switch_active = Column(Boolean, default=False, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    merchant = relationship("Merchant", back_populates="policies")
+
+    __table_args__ = (
+        Index("idx_policy_merchant", "merchant_id"),
+    )
+
+
+class BankHealthRecord(Base):
+    """Real-time issuer bank health, ACS degradation, and anomaly monitoring"""
+    __tablename__ = "bank_health_records"
+
+    id = Column(String(36), primary_key=True)
+    bank_name = Column(String(100), nullable=False)  # HDFC Bank, SBI, ICICI Bank, Axis Bank, Kotak Mahindra
+    success_rate = Column(Float, default=0.92, nullable=False)
+    failure_rate = Column(Float, default=0.08, nullable=False)
+    timeout_rate = Column(Float, default=0.02, nullable=False)
+    avg_latency_ms = Column(Integer, default=1450, nullable=False)
+    anomaly_score = Column(Float, default=0.05, nullable=False)
+    degradation_status = Column(String(50), default="healthy", nullable=False)  # healthy, degraded, critical
+    recommended_action = Column(String(255), default="NORMAL_ROUTING", nullable=False)
+    recorded_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        Index("idx_bank_health_name", "bank_name"),
+        Index("idx_bank_health_status", "degradation_status"),
+        Index("idx_bank_health_recorded", "recorded_at"),
+    )
+
+
+class GatewayHealthRecord(Base):
+    """Real-time payment gateway health, failure spikes, and routing telemetry"""
+    __tablename__ = "gateway_health_records"
+
+    id = Column(String(36), primary_key=True)
+    gateway_name = Column(String(100), nullable=False)  # Razorpay Optimizer, Stripe, PayU, BillDesk, Cashfree
+    success_rate = Column(Float, default=0.94, nullable=False)
+    failure_rate = Column(Float, default=0.06, nullable=False)
+    timeout_rate = Column(Float, default=0.015, nullable=False)
+    avg_latency_ms = Column(Integer, default=980, nullable=False)
+    anomaly_score = Column(Float, default=0.03, nullable=False)
+    degradation_status = Column(String(50), default="healthy", nullable=False)  # healthy, degraded, critical
+    recommended_action = Column(String(255), default="OPTIMAL_ROUTING", nullable=False)
+    recorded_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        Index("idx_gateway_health_name", "gateway_name"),
+        Index("idx_gateway_health_status", "degradation_status"),
+    )
+
+
+class BanditArmLog(Base):
+    """Safe contextual multi-armed bandit audit trail and learning loop updates"""
+    __tablename__ = "bandit_arm_logs"
+
+    id = Column(String(36), primary_key=True)
+    merchant_id = Column(String(36), ForeignKey("merchants.id"), nullable=False)
+    transaction_id = Column(String(36), nullable=False)
+    arm_name = Column(String(100), nullable=False)  # upi_intent, delayed_card_retry, whatsapp_recovery, etc.
+    context_features = Column(Text, nullable=False)  # JSON representation of state
+    expected_reward = Column(Float, nullable=False)
+    actual_reward = Column(Float, nullable=True)  # Net recovered revenue upon completion
+    channel_cost = Column(Float, default=1.85, nullable=False)
+    is_exploration = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    resolved_at = Column(DateTime, nullable=True)
+
+    merchant = relationship("Merchant", back_populates="bandit_logs")
+
+    __table_args__ = (
+        Index("idx_bandit_merchant", "merchant_id"),
+        Index("idx_bandit_arm", "arm_name"),
+        Index("idx_bandit_created", "created_at"),
+    )
+
+
+class RiskAssessment(Base):
+    """Dedicated pre-recovery risk engine evaluation and anti-fraud verification"""
+    __tablename__ = "risk_assessments"
+
+    id = Column(String(36), primary_key=True)
+    transaction_id = Column(String(36), nullable=False)
+    merchant_id = Column(String(36), nullable=False)
+    customer_id = Column(String(36), nullable=True)
+    risk_score = Column(Float, default=15.0, nullable=False)  # 0 to 100
+    risk_tier = Column(String(50), default="LOW_RISK", nullable=False)  # LOW_RISK, MEDIUM_RISK, HIGH_RISK, BLOCKED
+    velocity_1h = Column(Integer, default=1, nullable=False)
+    velocity_24h = Column(Integer, default=1, nullable=False)
+    amount_deviation_score = Column(Float, default=0.1, nullable=False)
+    instrument_switch_count = Column(Integer, default=0, nullable=False)
+    risk_factors = Column(Text, default="[]", nullable=False)  # JSON array of detected risk signals
+    is_eligible_for_recovery = Column(Boolean, default=True, nullable=False)
+    evaluated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        Index("idx_risk_txn", "transaction_id"),
+        Index("idx_risk_tier", "risk_tier"),
+    )
+
+
+class FailureClassificationCorrection(Base):
+    """Hierarchical failure taxonomy corrections and human-in-the-loop feedback"""
+    __tablename__ = "failure_classification_corrections"
+
+    id = Column(String(36), primary_key=True)
+    transaction_id = Column(String(36), nullable=False)
+    merchant_id = Column(String(36), nullable=False)
+    predicted_category = Column(String(50), nullable=False)  # Issuer, Gateway, Authentication, Customer, Permanent
+    predicted_subcategory = Column(String(100), nullable=False)
+    confidence = Column(Float, nullable=False)
+    corrected_category = Column(String(50), nullable=False)
+    corrected_subcategory = Column(String(100), nullable=False)
+    operator_id = Column(String(100), default="revops_lead", nullable=False)
+    feedback_notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        Index("idx_fail_correction_txn", "transaction_id"),
+        Index("idx_fail_correction_cat", "corrected_category"),
+    )
+
+
+class CustomerRecoveryProfile(Base):
+    """Deep customer affinity, conversion benchmarks, and active recovery windows"""
+    __tablename__ = "customer_recovery_profiles"
+
+    id = Column(String(36), primary_key=True)
+    customer_id = Column(String(36), ForeignKey("customers.id"), unique=True, nullable=False)
+    merchant_id = Column(String(36), nullable=False)
+    total_transactions = Column(Integer, default=10, nullable=False)
+    failed_transactions = Column(Integer, default=2, nullable=False)
+    recovered_transactions = Column(Integer, default=2, nullable=False)
+    recovery_success_rate = Column(Float, default=0.85, nullable=False)
+    preferred_channel = Column(String(50), default="upi", nullable=False)
+    channel_conversion_rates = Column(Text, default='{"upi": 0.88, "whatsapp": 0.74, "card": 0.42, "sms": 0.58}', nullable=False)
+    best_window_start_hour = Column(Integer, default=19, nullable=False)  # 7 PM IST
+    best_window_end_hour = Column(Integer, default=22, nullable=False)    # 10 PM IST
+    avg_recovery_latency_minutes = Column(Float, default=6.5, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    customer = relationship("Customer", back_populates="recovery_profile")
+
+    __table_args__ = (
+        Index("idx_cust_prof_cust", "customer_id"),
+        Index("idx_cust_prof_channel", "preferred_channel"),
     )
 

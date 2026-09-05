@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import axios from 'axios'
 import {
-  Search, Filter, Download, HelpCircle, CheckCircle2, RefreshCw, ArrowUpDown, ChevronLeft, ChevronRight, Loader2, CheckSquare, Square
+  Search, Filter, Download, HelpCircle, CheckCircle2, RefreshCw, ArrowUpDown, ChevronLeft, ChevronRight, Loader2, CheckSquare, Square,
+  PhoneCall, MessageSquare
 } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { StatusBadge } from '../../components/ui/StatusBadge'
@@ -294,6 +295,20 @@ export default function RecoveryOpportunitiesPage() {
                       </td>
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          <Link
+                            href="/recovery/voice-agent"
+                            className="p-1 text-pink-600 hover:text-pink-700 rounded hover:bg-pink-50"
+                            title="Launch Free AI Voice Call"
+                          >
+                            <PhoneCall className="w-3.5 h-3.5" />
+                          </Link>
+                          <Link
+                            href="/recovery/sms-gateway"
+                            className="p-1 text-blue-600 hover:text-blue-700 rounded hover:bg-blue-50"
+                            title="Send Demo Recovery SMS"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                          </Link>
                           <button
                             onClick={() => {
                               setActiveExplain({

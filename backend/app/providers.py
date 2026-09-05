@@ -5,6 +5,7 @@ Supports MockProvider (synthetic) and RazorpayProvider (test mode).
 
 from abc import ABC, abstractmethod
 from typing import Dict, Optional, List
+import os
 import uuid
 import random
 from datetime import datetime, timedelta
@@ -268,33 +269,111 @@ class RazorpayProvider(PaymentProvider):
         }
 
 
+class StripeProvider(PaymentProvider):
+    """Stripe payment provider abstraction"""
+
+    def __init__(self, api_key: Optional[str] = None):
+        self.name = "stripe"
+        self.api_key = api_key or os.getenv("STRIPE_SECRET_KEY", "sk_test_demo")
+
+    def get_payments(self, limit: int = 100, offset: int = 0) -> Dict:
+        return {"provider": self.name, "count": 0, "payments": [], "note": "Stripe test mode"}
+
+    def get_payment(self, payment_id: str) -> Dict:
+        return {"provider": self.name, "payment_id": payment_id, "status": "succeeded"}
+
+    def create_payment_link(self, amount: float, customer_email: str, description: str) -> Dict:
+        link_id = f"plink_{uuid.uuid4().hex[:14]}"
+        return {
+            "provider": self.name,
+            "link_id": link_id,
+            "short_url": f"buy.stripe.com/test_{link_id[:8]}",
+            "amount": float(amount),
+            "customer_email": customer_email,
+            "description": description,
+            "status": "active"
+        }
+
+    def get_refunds(self, limit: int = 100, offset: int = 0) -> Dict:
+        return {"provider": self.name, "count": 0, "refunds": []}
+
+    def refund_payment(self, payment_id: str, amount: float, reason: str) -> Dict:
+        return {"provider": self.name, "refund_id": f"re_{uuid.uuid4().hex[:14]}", "status": "succeeded"}
+
+    def get_settlements(self, limit: int = 100, offset: int = 0) -> Dict:
+        return {"provider": self.name, "count": 0, "settlements": []}
+
+    def create_payout(self, account_number: str, amount: float, description: str) -> Dict:
+        return {"provider": self.name, "payout_id": f"po_{uuid.uuid4().hex[:14]}", "status": "paid"}
+
+
+class GenericProvider(PaymentProvider):
+    """Generic payment provider interface for custom or regional acquirers"""
+
+    def __init__(self, gateway_name: str = "generic"):
+        self.name = gateway_name
+
+    def get_payments(self, limit: int = 100, offset: int = 0) -> Dict:
+        return {"provider": self.name, "count": 0, "payments": []}
+
+    def get_payment(self, payment_id: str) -> Dict:
+        return {"provider": self.name, "payment_id": payment_id, "status": "processed"}
+
+    def create_payment_link(self, amount: float, customer_email: str, description: str) -> Dict:
+        link_id = str(uuid.uuid4())
+        return {
+            "provider": self.name,
+            "link_id": link_id,
+            "short_url": f"pay.revpilot.ai/{link_id[:8]}",
+            "amount": float(amount),
+            "customer_email": customer_email,
+            "description": description,
+            "status": "created"
+        }
+
+    def get_refunds(self, limit: int = 100, offset: int = 0) -> Dict:
+        return {"provider": self.name, "count": 0, "refunds": []}
+
+    def refund_payment(self, payment_id: str, amount: float, reason: str) -> Dict:
+        return {"provider": self.name, "refund_id": str(uuid.uuid4()), "status": "success"}
+
+    def get_settlements(self, limit: int = 100, offset: int = 0) -> Dict:
+        return {"provider": self.name, "count": 0, "settlements": []}
+
+    def create_payout(self, account_number: str, amount: float, description: str) -> Dict:
+        return {"provider": self.name, "payout_id": str(uuid.uuid4()), "status": "queued"}
+
+
 class ProviderFactory:
     """Factory for creating payment provider instances"""
-    
+
     _providers = {
         "mock": MockProvider,
         "razorpay": RazorpayProvider,
+        "stripe": StripeProvider,
+        "generic": GenericProvider
     }
-    
+
     @staticmethod
     def create(provider_name: str, **kwargs) -> PaymentProvider:
         """Create a payment provider instance"""
-        if provider_name not in ProviderFactory._providers:
-            raise ValueError(f"Unknown provider: {provider_name}. Available: {list(ProviderFactory._providers.keys())}")
-        
-        provider_class = ProviderFactory._providers[provider_name]
-        
-        if provider_name == "mock":
+        p_name = provider_name.lower()
+        if p_name not in ProviderFactory._providers:
+            return GenericProvider(gateway_name=provider_name)
+
+        provider_class = ProviderFactory._providers[p_name]
+
+        if p_name == "mock":
             return provider_class()
-        elif provider_name == "razorpay":
-            api_key = kwargs.get("api_key")
-            api_secret = kwargs.get("api_secret")
-            if not api_key or not api_secret:
-                raise ValueError("Razorpay provider requires api_key and api_secret")
+        elif p_name == "razorpay":
+            api_key = kwargs.get("api_key", "rzp_test_key")
+            api_secret = kwargs.get("api_secret", "rzp_test_secret")
             return provider_class(api_key, api_secret)
+        elif p_name == "stripe":
+            return provider_class(api_key=kwargs.get("api_key"))
         else:
             return provider_class()
-    
+
     @staticmethod
     def get_default_provider() -> PaymentProvider:
         """Get the default provider (mock)"""
