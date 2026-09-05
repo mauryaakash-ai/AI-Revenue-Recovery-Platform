@@ -1,15 +1,21 @@
-# Comprehensive Project Report: AI Revenue Recovery Platform (RevPilot)
+# RevPilot — Autonomous AI Revenue Recovery Platform
 
 > **Autonomous, Risk-Gated Payment Recovery & Multi-Channel Revenue Optimization Engine**  
-> **Production Specification, Subsystem Architecture, and Performance Report**
+> **Production Specification, Complete Architecture, Local Deployment Guide, and Performance Report**
+
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Next.js 14](https://img.shields.io/badge/Frontend-Next.js%2014-black?style=flat&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![SQLite/Postgres](https://img.shields.io/badge/Database-SQLite%20%2F%20PostgreSQL-003B57?style=flat&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
 ## 1. Executive Summary & Problem Formulation
 
-In the modern digital economy—especially across high-velocity sectors like E-commerce, Direct-to-Consumer (D2C), Subscription SaaS, Travel, EdTech, and B2B Commerce—**revenue loss occurs continuously across the entire customer lifecycle**. 
+In the modern digital economy—especially across high-velocity sectors like E-commerce, Direct-to-Consumer (D2C), Subscription SaaS, Travel, EdTech, and B2B Commerce—**revenue loss occurs continuously across the entire customer transaction lifecycle**: from pre-payment cart drop-offs and one-time gateway failures to involuntary subscription churn, mandate failures, and overdue corporate invoices.
 
-Traditional revenue recovery mechanisms suffer from critical structural weaknesses:
+Traditional recovery mechanisms suffer from critical structural weaknesses:
 1. **Blind Naive Retries**: Re-attempting transactions immediately without understanding root causes triggers secondary acquirer declines, heavy bank surcharge penalties, and customer card cancellations.
 2. **One-Size-Fits-All Outreach**: Generic emails or robotic automated robocalls that fail to engage non-digital shoppers, elderly customers, or regional Indian demographics.
 3. **Absence of Risk Controls**: Retrying potentially fraudulent or high-velocity chargeback transactions increases merchant dispute ratios, leading to gateway suspension.
@@ -17,11 +23,11 @@ Traditional revenue recovery mechanisms suffer from critical structural weakness
 
 **RevPilot** solves these challenges by implementing an autonomous, explainable, risk-gated Economic Recovery Engine that maximizes **Economic Net Realizable Value ($\text{ENRV}$)** while ensuring 100% regulatory compliance.
 
+$$\text{ENRV} = (\text{Amount} \times P_{\text{recovery}}) - (\text{Comm Cost} + \text{Acquirer Fee} + \text{Customer Churn Risk})$$
+
 ---
 
-## 2. Multi-Lifecycle Revenue Recovery Architecture
-
-RevPilot manages recovery across 8 interconnected lifecycle capabilities:
+## 2. End-to-End System Architecture
 
 ```mermaid
 flowchart TD
@@ -29,34 +35,88 @@ flowchart TD
         A[Cart & Checkout Drop-off] -->|Price / Form / Latency Friction| B[1-Click Cart State Restore]
     end
 
-    subgraph Layer2 ["2. Transaction & Recurring Failures"]
-        C[One-Time Checkout Failures] --> D[Smart Payment Routing & UPI Intent]
-        E[Recurring Subscription Churn] --> F[Graduated Dunning & Salary Optimizer]
-        G[UPI Autopay & e-NACH Failures] --> H[Mandate Retry Sequencer & RBI Spacing]
+    subgraph Layer2 ["2. Ingestion & Intelligence"]
+        C[Transaction / Webhook Event] --> D[Webhook HMAC-SHA256 Verifier]
+        D --> E[Hierarchical Failure Taxonomy]
+        E --> F[Pre-Recovery Fraud & Velocity Risk Engine]
+        F --> G[Bank Health & Gateway Telemetry]
+        G --> H[Contextual Multi-Armed Bandit UCB1]
     end
 
-    subgraph Layer3 ["3. High-Touch & Corporate Recovery"]
-        I[Overdue Corporate Invoices] --> J[B2B Receivables Chaser & Aging Matrix]
-        K[Unresponsive & High-Value Customers] --> L[🎙️ Neural Multi-Voice AI Softphone]
+    subgraph Layer3 ["3. Decision Core & Economic Gating"]
+        H --> I[Economic Net Realizable Value ENRV Calculation]
+        I --> J{Tri-State Confidence Gate}
+        J -->|Confidence >= 0.80 & Low Risk| K[Autonomous Auto-Execution]
+        J -->|0.50 <= Conf < 0.80 or High Value| L[Human-in-the-Loop Review Queue]
+        J -->|High Risk or Permanent Failure| M[Suppression & Chargeback Guard]
     end
 
     subgraph Layer4 ["4. Omnichannel Dispatch & Telephony"]
-        L --> M[📱 Free Demo SMS Gateway]
-        L --> N[💬 1-Click WhatsApp Link]
-        L --> O[Promise-to-Pay PTP Tracker]
+        K & L --> N[🎙️ Neural Multi-Voice Softphone]
+        K & L --> O[📱 Free TRAI DLT SMS Gateway]
+        K & L --> P[💬 1-Click WhatsApp Payment Link]
+        K & L --> Q[🔄 Smart UPI / Mandate Retry Sequencer]
+        K & L --> R[🤝 Promise-to-Pay PTP Tracker]
     end
 
-    subgraph Layer5 ["5. Governance & Decision Core"]
-        B & D & F & H & J & M & N & O --> P[Pre-Recovery Risk Engine & Fraud Scorer]
-        P --> Q[Contextual Multi-Armed Bandit]
-        Q --> R[Economic Decision Gate: ENRV Optimization]
-        R --> S[Immutable Audit Ledger & RBAC]
+    subgraph Layer5 ["5. Governance & Observability"]
+        N & O & P & Q & R --> S[Immutable Cryptographic Audit Ledger]
+        S --> T[Monte Carlo 2.0 Forecaster: 1,000 Paths]
+        S --> U[Fine-Grained 6-Role RBAC Security]
     end
 ```
 
 ---
 
-## 3. The 8 Core Enterprise Recovery Capabilities
+## 3. 🚀 Quick Start (Zero Docker Required)
+
+RevPilot runs directly on your local system with standard Python and Node.js environments.
+
+### 1. Prerequisites
+- **Python 3.10+** (FastAPI, SQLAlchemy, Pydantic, scikit-learn, numpy, pandas)
+- **Node.js 18+** & **npm** (Next.js 14, React 18, Tailwind CSS, Lucide Icons, Recharts)
+- **Database**: SQLite embedded (`revenue_recovery.db`) — zero external database server setup required.
+
+### 2. Launch Commands
+
+#### Start Backend Server (FastAPI on Port 8000)
+```bash
+cd backend
+python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+#### Start Frontend UI (Next.js on Port 3000)
+```bash
+cd frontend
+npm run dev
+```
+
+#### Seed Synthetic Enterprise Data (Optional)
+```bash
+python3 data/generator.py
+```
+
+---
+
+## 4. 🌐 Local Deployment — Application Endpoints & Port Map
+
+When you deploy RevPilot locally on your machine, all services, interactive softphones, analytics dashboards, and REST endpoints are immediately accessible at the following URLs:
+
+| Service | URL | Description |
+|---|---|---|
+| 🖥️ **Web Control Center** | [http://localhost:3000](http://localhost:3000) | Full Next.js React Dashboard, Analytics & Ledgers |
+| 🎙️ **Voice Recovery Softphone** | [http://localhost:3000/recovery/voice-agent](http://localhost:3000/recovery/voice-agent) | 5 Neural Personas, Live Player & Outbound Queue |
+| 📱 **SMS Recovery Gateway** | [http://localhost:3000/recovery/sms-gateway](http://localhost:3000/recovery/sms-gateway) | Free Demo SMS Dispatcher & Mobile Device Mockup |
+| 🔐 **Authentication & Login** | [http://localhost:3000/login](http://localhost:3000/login) | 1-Click Demo Logins for 5 Personas & SMS OTP |
+| 🏥 **Bank Health Telemetry** | [http://localhost:3000/analytics/bank-health](http://localhost:3000/analytics/bank-health) | Live Acquirer Success Rates & Downtime Alerts |
+| 🎰 **MAB Strategy Optimizer** | [http://localhost:3000/strategies/bandit](http://localhost:3000/strategies/bandit) | Contextual Multi-Armed Bandit Performance |
+| ⚡ **FastAPI REST Server** | [http://localhost:8000](http://localhost:8000) | High-Performance Asynchronous Python Microservice |
+| 📖 **Interactive Swagger Docs** | [http://localhost:8000/docs](http://localhost:8000/docs) | Complete Interactive OpenAPI Testing Suite |
+| 🩺 **System Health Probe** | [http://localhost:8000/api/v1/health-monitoring/status](http://localhost:8000/api/v1/health-monitoring/status) | Real-time Gateway & DB Telemetry Health |
+
+---
+
+## 5. 💎 The 8 Core Enterprise Recovery Capabilities
 
 ### 1. Checkout Drop-off Recovery (`/recovery/checkout-dropoff`)
 - **Real-Time Detection**: Captures cart abandonment events (session timeout, back-button exit, payment page abandonment) before transaction attempt completes.
@@ -90,7 +150,7 @@ flowchart TD
 - **Call Recording Ledger & Player**: Interactive audio player with live animated frequency bars, formatted durations, and 1-click `.mp3` downloads.
 - **Outbound Calling Worklist**: Partitioned for **🔴 Failed Payment Retries** and **🟡 Pending Debits** with 1-click customer dialing.
 - **Interactive IVR / DTMF**: Key 1 sends 1-Click WhatsApp payment link (`RECOVERED`); Key 2 logs Promise-to-Pay (`PTP_COMMITTED`); Key 3 connects to human escalation desk.
-- **Guaranteed SQLite Recording Persistence**: Real-time commits on call end, audio completion, DTMF press, or manual save.
+- **Guaranteed SQLite Recording Persistence**: Real-time commits on call end, audio completion, DTMF press, or manual save (`POST /api/v1/voice/call/save-recording`).
 
 ### 6. 📱 Free Demo SMS Gateway (`/recovery/sms-gateway`)
 - **TRAI DLT Pre-Approved Templates**: Pre-configured templates (`cart_recovery`, `payment_retry`, `login_otp`, `invoice_dunning`) with official headers (`RZRPAY`).
@@ -115,27 +175,9 @@ flowchart TD
 
 ---
 
-## 4. Local Deployment — Application Endpoints & Port Map
+## 6. 📐 Mathematical & Algorithmic Formulations
 
-If you deploy RevPilot locally on your machine, all interactive softphones, analytics dashboards, and backend microservices are immediately accessible at the following URLs:
-
-| Service | URL | Description |
-|---|---|---|
-| 🖥️ **Web Control Center** | [http://localhost:3000](http://localhost:3000) | Full Next.js React Dashboard, Analytics & Ledgers |
-| 🎙️ **Voice Recovery Softphone** | [http://localhost:3000/recovery/voice-agent](http://localhost:3000/recovery/voice-agent) | 5 Neural Personas, Live Player & Outbound Queue |
-| 📱 **SMS Recovery Gateway** | [http://localhost:3000/recovery/sms-gateway](http://localhost:3000/recovery/sms-gateway) | Free Demo SMS Dispatcher & Mobile Device Mockup |
-| 🔐 **Authentication & Login** | [http://localhost:3000/login](http://localhost:3000/login) | 1-Click Demo Logins for 5 Personas & SMS OTP |
-| 🏥 **Bank Health Telemetry** | [http://localhost:3000/analytics/bank-health](http://localhost:3000/analytics/bank-health) | Live Acquirer Success Rates & Downtime Alerts |
-| 🎰 **MAB Strategy Optimizer** | [http://localhost:3000/strategies/bandit](http://localhost:3000/strategies/bandit) | Contextual Multi-Armed Bandit Performance |
-| ⚡ **FastAPI REST Server** | [http://localhost:8000](http://localhost:8000) | High-Performance Asynchronous Python Microservice |
-| 📖 **Interactive Swagger Docs** | [http://localhost:8000/docs](http://localhost:8000/docs) | Complete Interactive OpenAPI Testing Suite |
-| 🩺 **System Health Probe** | [http://localhost:8000/api/v1/health-monitoring/status](http://localhost:8000/api/v1/health-monitoring/status) | Real-time Gateway & DB Telemetry Health |
-
----
-
-## 5. Mathematical & Algorithmic Formulations
-
-### 5.1 Economic Net Realizable Value ($\text{ENRV}$)
+### 6.1 Economic Net Realizable Value ($\text{ENRV}$)
 RevPilot evaluates every candidate recovery action using the net expected economic value:
 
 $$\text{ENRV} = (A \times P_{\text{recovery}}) - (C_{\text{comm}} + C_{\text{acquirer}} + R_{\text{churn}})$$
@@ -147,7 +189,7 @@ Where:
 - $C_{\text{acquirer}}$: Gateway and bank decline penalties.
 - $R_{\text{churn}}$: Customer lifetime value churn penalty from communication fatigue.
 
-### 5.2 Contextual Multi-Armed Bandit (Upper Confidence Bound - UCB1)
+### 6.2 Contextual Multi-Armed Bandit (Upper Confidence Bound - UCB1)
 The strategy optimizer dynamically balances exploration of new recovery channels with exploitation of proven high-yield channels:
 
 $$\text{Score}_i = \hat{\mu}_i + c \sqrt{\frac{\ln N}{n_i}}$$
@@ -158,7 +200,7 @@ Where:
 - $n_i$: Number of attempts allocated to channel $i$.
 - $c$: Exploration factor ($c = \sqrt{2} \approx 1.414$).
 
-### 5.3 Promise-to-Pay (PTP) Customer Reliability Score
+### 6.3 Promise-to-Pay (PTP) Customer Reliability Score
 Customer reliability score ($S_{\text{rel}}$) dynamically weights past commitment fulfillment:
 
 $$S_{\text{rel}} = \frac{\sum_{j=1}^{k} w_j \cdot I(\text{fulfilled}_j)}{\sum_{j=1}^{k} w_j} \times 100\%$$
@@ -167,7 +209,7 @@ Where $w_j = e^{-\lambda \cdot t_j}$ applies exponential decay to older commitme
 
 ---
 
-## 6. System Performance & Business Impact Benchmarks
+## 7. 📊 System Performance & Business Impact Benchmarks
 
 | Metric | Industry Baseline | RevPilot Autonomous Platform | Improvement Delta |
 |---|---|---|---|
@@ -181,10 +223,55 @@ Where $w_j = e^{-\lambda \cdot t_j}$ applies exponential decay to older commitme
 
 ---
 
-## 7. Subsystem Verification & Test Results
+## 8. 🗺️ Complete Navigable Application Sitemap
+
+```
+├── 📊 Dashboard & Financial Operations
+│   ├── / .................................... Executive KPI Overview & Funnel Analytics
+│   ├── /recovery/opportunities .............. High-Yield Recovery Opportunities Queue
+│   ├── /recovery/active ..................... Active Scheduled Retries & Recovery Operations
+│   ├── /recovery/history .................... Immutable Financial Recovery Ledger
+│   ├── /recovery/voice-agent ................ Neural Multi-Voice Softphone & Call Recordings
+│   ├── /recovery/sms-gateway ................ Free Demo SMS Dispatcher & Smartphone Mockup
+│   ├── /recovery/checkout-dropoff ........... Cart Abandonment & Pre-Payment Recovery
+│   ├── /recovery/dunning .................... Subscription Churn & Salary-Cycle Dunning
+│   ├── /recovery/b2b-chaser ................. B2B Overdue Invoices & Aging Matrix (DPD)
+│   ├── /recovery/mandates ................... UPI Autopay & e-NACH Sequencer
+│   └── /recovery/ptp-tracker ................ Promise-to-Pay Commitment Reliability Tracker
+│
+├── 📈 Intelligence & Diagnostics
+│   ├── /analytics/payment-methods ........... Method-Level Breakdown (UPI, Card, NetBanking)
+│   ├── /analytics/failures .................. Failure Spike Root-Cause Isolation
+│   ├── /analytics/bank-health ............... Live Acquirer Telemetry & Downtime Monitor
+│   ├── /analytics/forecast .................. Monte Carlo 1,000-Path Predictive Models
+│   ├── /strategies .......................... Recovery Rule Builder & Multi-Channel Workflows
+│   ├── /strategies/bandit ................... Contextual Multi-Armed Bandit (RL)
+│   └── /experiments ......................... Multi-Variant A/B Conversion Experiments
+│
+├── 🛡️ Governance, Audits & Platform
+│   ├── /transactions ........................ Forensic Transaction Deep-Dive Explorer
+│   ├── /customers ........................... Customer LTV, Segments & Contact Windows
+│   ├── /alerts .............................. Real-Time Financial Spike & Anomaly Alerts
+│   ├── /webhooks ............................ HMAC Webhook Ingestion & Simulator
+│   ├── /settings ............................ Confidence Thresholds & RBAC Matrix
+│   └── /login ............................... 1-Click Demo Personas & SMS OTP
+```
+
+---
+
+## 9. 🧪 Automated Test Suite Verification
 
 The platform has been validated through automated test suites covering all backend routes, security policies, and telephony pipelines:
 
+```bash
+# Run Auth, SMS & Voice Test Suite
+PYTHONPATH=backend python3 backend/tests/test_auth_sms_voice.py
+
+# Run Enterprise Architecture & Decision Engine Suite
+PYTHONPATH=backend python3 backend/tests/test_revpilot_enterprise.py
+```
+
+### Verified Test Session Output:
 ```
 ================================ test session starts ================================
 collected 18 items
@@ -213,8 +300,6 @@ tests/test_revpilot_enterprise.py::test_bank_health_telemetry PASSED         [10
 
 ---
 
-## 8. Conclusion & Production Readiness
+## 10. 📜 License
 
-RevPilot represents an enterprise-grade AI revenue recovery architecture combining **autonomous intelligence**, **multi-persona neural voice telephony**, **TRAI DLT SMS dispatching**, and **risk-gated economic optimization**. 
-
-By running entirely on standard local Python and Node.js runtimes with ₹0.00 external dependency cost, RevPilot delivers immediate production value, verifiable financial recovery, and zero infrastructure friction.
+This project is licensed under the **MIT License**.
