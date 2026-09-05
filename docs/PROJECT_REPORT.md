@@ -115,9 +115,27 @@ flowchart TD
 
 ---
 
-## 4. Mathematical & Algorithmic Formulations
+## 4. Local Deployment — Application Endpoints & Port Map
 
-### 4.1 Economic Net Realizable Value ($\text{ENRV}$)
+If you deploy RevPilot locally on your machine, all interactive softphones, analytics dashboards, and backend microservices are immediately accessible at the following URLs:
+
+| Service | URL | Description |
+|---|---|---|
+| 🖥️ **Web Control Center** | [http://localhost:3000](http://localhost:3000) | Full Next.js React Dashboard, Analytics & Ledgers |
+| 🎙️ **Voice Recovery Softphone** | [http://localhost:3000/recovery/voice-agent](http://localhost:3000/recovery/voice-agent) | 5 Neural Personas, Live Player & Outbound Queue |
+| 📱 **SMS Recovery Gateway** | [http://localhost:3000/recovery/sms-gateway](http://localhost:3000/recovery/sms-gateway) | Free Demo SMS Dispatcher & Mobile Device Mockup |
+| 🔐 **Authentication & Login** | [http://localhost:3000/login](http://localhost:3000/login) | 1-Click Demo Logins for 5 Personas & SMS OTP |
+| 🏥 **Bank Health Telemetry** | [http://localhost:3000/analytics/bank-health](http://localhost:3000/analytics/bank-health) | Live Acquirer Success Rates & Downtime Alerts |
+| 🎰 **MAB Strategy Optimizer** | [http://localhost:3000/strategies/bandit](http://localhost:3000/strategies/bandit) | Contextual Multi-Armed Bandit Performance |
+| ⚡ **FastAPI REST Server** | [http://localhost:8000](http://localhost:8000) | High-Performance Asynchronous Python Microservice |
+| 📖 **Interactive Swagger Docs** | [http://localhost:8000/docs](http://localhost:8000/docs) | Complete Interactive OpenAPI Testing Suite |
+| 🩺 **System Health Probe** | [http://localhost:8000/api/v1/health-monitoring/status](http://localhost:8000/api/v1/health-monitoring/status) | Real-time Gateway & DB Telemetry Health |
+
+---
+
+## 5. Mathematical & Algorithmic Formulations
+
+### 5.1 Economic Net Realizable Value ($\text{ENRV}$)
 RevPilot evaluates every candidate recovery action using the net expected economic value:
 
 $$\text{ENRV} = (A \times P_{\text{recovery}}) - (C_{\text{comm}} + C_{\text{acquirer}} + R_{\text{churn}})$$
@@ -129,7 +147,7 @@ Where:
 - $C_{\text{acquirer}}$: Gateway and bank decline penalties.
 - $R_{\text{churn}}$: Customer lifetime value churn penalty from communication fatigue.
 
-### 4.2 Contextual Multi-Armed Bandit (Upper Confidence Bound - UCB1)
+### 5.2 Contextual Multi-Armed Bandit (Upper Confidence Bound - UCB1)
 The strategy optimizer dynamically balances exploration of new recovery channels with exploitation of proven high-yield channels:
 
 $$\text{Score}_i = \hat{\mu}_i + c \sqrt{\frac{\ln N}{n_i}}$$
@@ -140,7 +158,7 @@ Where:
 - $n_i$: Number of attempts allocated to channel $i$.
 - $c$: Exploration factor ($c = \sqrt{2} \approx 1.414$).
 
-### 4.3 Promise-to-Pay (PTP) Customer Reliability Score
+### 5.3 Promise-to-Pay (PTP) Customer Reliability Score
 Customer reliability score ($S_{\text{rel}}$) dynamically weights past commitment fulfillment:
 
 $$S_{\text{rel}} = \frac{\sum_{j=1}^{k} w_j \cdot I(\text{fulfilled}_j)}{\sum_{j=1}^{k} w_j} \times 100\%$$
@@ -149,7 +167,7 @@ Where $w_j = e^{-\lambda \cdot t_j}$ applies exponential decay to older commitme
 
 ---
 
-## 5. System Performance & Business Impact Benchmarks
+## 6. System Performance & Business Impact Benchmarks
 
 | Metric | Industry Baseline | RevPilot Autonomous Platform | Improvement Delta |
 |---|---|---|---|
@@ -163,7 +181,7 @@ Where $w_j = e^{-\lambda \cdot t_j}$ applies exponential decay to older commitme
 
 ---
 
-## 6. Subsystem Verification & Test Results
+## 7. Subsystem Verification & Test Results
 
 The platform has been validated through automated test suites covering all backend routes, security policies, and telephony pipelines:
 
@@ -195,7 +213,7 @@ tests/test_revpilot_enterprise.py::test_bank_health_telemetry PASSED         [10
 
 ---
 
-## 7. Conclusion & Production Readiness
+## 8. Conclusion & Production Readiness
 
 RevPilot represents an enterprise-grade AI revenue recovery architecture combining **autonomous intelligence**, **multi-persona neural voice telephony**, **TRAI DLT SMS dispatching**, and **risk-gated economic optimization**. 
 

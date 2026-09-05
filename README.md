@@ -70,7 +70,9 @@ python3 data/generator.py
 
 ---
 
-## 🌐 Application Endpoints & Port Map
+## 🌐 Local Deployment — Application Endpoints & Port Map
+
+When you deploy RevPilot locally on your machine, all services, interactive softphones, analytics dashboards, and REST endpoints are immediately accessible at the following URLs:
 
 | Service | URL | Description |
 |---|---|---|
