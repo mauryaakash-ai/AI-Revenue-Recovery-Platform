@@ -271,34 +271,6 @@ PYTHONPATH=backend python3 backend/tests/test_auth_sms_voice.py
 PYTHONPATH=backend python3 backend/tests/test_revpilot_enterprise.py
 ```
 
-### Verified Test Session Output:
-```
-================================ test session starts ================================
-collected 18 items
-
-tests/test_auth_sms_voice.py::test_sms_templates PASSED                       [  5%]
-tests/test_auth_sms_voice.py::test_sms_send_mock PASSED                       [ 11%]
-tests/test_auth_sms_voice.py::test_auth_demo_personas PASSED                 [ 16%]
-tests/test_auth_sms_voice.py::test_auth_sms_otp_flow PASSED                  [ 22%]
-tests/test_auth_sms_voice.py::test_voice_dispatch_multi_persona PASSED        [ 27%]
-tests/test_auth_sms_voice.py::test_voice_calling_queue_partitioned PASSED    [ 33%]
-tests/test_auth_sms_voice.py::test_voice_recording_url_persistence PASSED    [ 38%]
-tests/test_auth_sms_voice.py::test_voice_dtmf_recovery_ptp PASSED            [ 44%]
-tests/test_auth_sms_voice.py::test_voice_calls_ledger_filter PASSED           [ 50%]
-tests/test_revpilot_enterprise.py::test_webhook_hmac_verification PASSED     [ 55%]
-tests/test_revpilot_enterprise.py::test_hierarchical_failure_taxonomy PASSED  [ 61%]
-tests/test_revpilot_enterprise.py::test_risk_engine_velocity_scoring PASSED  [ 66%]
-tests/test_revpilot_enterprise.py::test_timing_engine_quiet_hours PASSED     [ 72%]
-tests/test_revpilot_enterprise.py::test_bandit_ucb1_allocation PASSED         [ 77%]
-tests/test_revpilot_enterprise.py::test_standard_decision_object PASSED       [ 83%]
-tests/test_revpilot_enterprise.py::test_monte_carlo_forecasting PASSED        [ 88%]
-tests/test_revpilot_enterprise.py::test_rbac_six_roles PASSED                 [ 94%]
-tests/test_revpilot_enterprise.py::test_bank_health_telemetry PASSED         [100%]
-
-================================ 18 passed in 2.14s ================================
-```
-
----
 
 ## 10. 📜 License
 
